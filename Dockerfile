@@ -10,7 +10,7 @@ COPY package.json /myapp/package.json
 RUN npm install
 
 EXPOSE 3000
-
+# test npm 
 CMD [ "tail", "-f", "/dev/null" ]
 
 
