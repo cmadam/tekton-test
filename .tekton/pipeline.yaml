@@ -1,0 +1,61 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: pipeline
+spec:
+  params:
+    - name: pipeline-pvc
+      description: the pipeline pvc name
+    - name: repository
+      description: the git repo
+    - name: revision
+      description: The git repo revision
+    - name: prnumber
+      description: The pullrequest number
+    - name: apikey
+      description: the ibmcloud api key
+    - name: imageurl
+      description: image url into registry
+  tasks:
+    - name: pipeline-gitsecure-discovery-task
+      taskRef:
+        name: gitsecure-discovery-task
+      params:
+        - name: task-pvc
+          value: $(params.pipeline-pvc)
+        - name: repository
+          value: $(params.repository)
+        - name: revision
+          value: $(params.revision)
+        - name: apikey
+          value: $(params.apikey)
+    - name: pipeline-build-task
+      runAfter: [pipeline-gitsecure-discovery-task]
+      taskRef:
+        name: build-task
+      params:
+        - name: task-pvc
+          value: $(params.pipeline-pvc)
+        - name: repository
+          value: $(params.repository)
+        - name: revision
+          value: $(params.revision)
+        - name: apikey
+          value: $(params.apikey)
+        - name: imageurl
+          value: $(params.imageurl)
+    - name: pipeline-gitsecure-buildindexer-task
+      runAfter: [pipeline-build-task]
+      taskRef:
+        name: gitsecure-buildindexer-task
+      params:
+        - name: task-pvc
+          value: $(params.pipeline-pvc)
+        - name: repository
+          value: $(params.repository)
+        - name: revision
+          value: $(params.revision)
+        - name: apikey
+          value: $(params.apikey)
+        - name: imageurl
+          value: $(params.imageurl)
